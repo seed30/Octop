@@ -143,6 +143,167 @@ entry points. Octop's `GlobalProcessor` implements the
 checkpoint and are pushed to the dashboard / IM channel by
 `on_reply`.
 
+## 7. System context (C4-L1)
+
+Everything inside the Octop boundary is the single process built from
+this wheel. Only LLM providers, IM platforms, MCP/tool backends and the local
+`~/.octop/` directory are outside it.
+
+```mermaid
+flowchart LR
+    user["Human user"]
+    browser["Dashboard SPA<br/>(React, served by Octop)"]
+    cli["octop CLI<br/>(REPL + commands)"]
+    im["IM platforms<br/>(WeChat, Feishu, ...)"]
+    llm["LLM providers<br/>(OpenAI-compatible, Ollama, ...)"]
+    tools["MCP servers /<br/>external tools"]
+    disk[("Local disk<br/>~/.octop/")]
+
+    subgraph octop["Octop — one Python process, one wheel"]
+        api["FastAPI<br/>HTTP + WebSocket /api"]
+        gateway["Gateway<br/>channels + WS hub + slash"]
+        agents["AgentManager<br/>HarnessAgent runtimes"]
+        cron["CronManager<br/>APScheduler"]
+        care["ProactiveCareScheduler"]
+        db[("SQLite<br/>octop.db")]
+    end
+
+    browser -->|"HTTPS / WSS /api"| api
+    cli -->|"in-process OctopServer or WS"| gateway
+    im -->|"webhooks / bot callbacks"| gateway
+    api --> gateway
+    api --> agents
+    gateway --> agents
+    gateway -->|"replies, pushes"| im
+    cron --> gateway
+    care --> gateway
+    agents -->|"chat + tool calls"| llm
+    agents --> tools
+    agents --> disk
+    api --> db
+    gateway --> db
+    agents --> db
+```
+
+Notes:
+
+- The dashboard is a static SPA shipped inside the wheel; Octop serves it
+  itself (see `build_app` in `src/octop/api/app.py`). There is no separate
+  web server to deploy.
+- IM connectivity is optional and configured per agent; agents without a
+  channel row never touch `ChannelManager`.
+- SQLite is the only required datastore. No queue, cache or external
+  service is required beyond the configured LLM provider.
+
+## 8. Component view (C4-L2)
+
+Boot order is the dependency order in `OctopServer.start()`
+(`src/octop/infra/server.py`); the resulting live singletons are held by
+`AppRuntime` and reached by routers through `server.app_runtime.*`.
+
+```mermaid
+flowchart TB
+    launch["launch.run_foreground_blocking()"]
+    app["api/app.build_app(server)<br/>FastAPI + routers"]
+    server["OctopServer.start()"]
+
+    subgraph boot["boot-time services"]
+        layout["PathLayout.from_env()"]
+        cfg["load_config()"]
+        svc["SharedServices<br/>(repos + factories)"]
+        migrations["run_migrations()"]
+        catalogs["ExpertCatalog + SubagentCatalog<br/>+ PluginManager"]
+    end
+
+    subgraph ar["AppRuntime (server.app_runtime)"]
+        am["AgentManager"]
+        gw["Gateway"]
+        cronm["CronManager"]
+        um["UserManager"]
+        pcs["ProactiveCareScheduler"]
+    end
+
+    subgraph gwp["Gateway internals"]
+        cm["ChannelManager<br/>(harness-gateway)"]
+        hub["WebSocketHub + CliHub"]
+        gp["GlobalProcessor<br/>(TeamProcessor)"]
+        slash["SlashDispatcher"]
+        th["ThreadRegistry"]
+    end
+
+    subgraph rt["per-agent runtime (lazily built)"]
+        ha["HarnessAgent<br/>(LangGraph)"]
+        bws["BackendWorkspace<br/>filesystem / S3 / COS"]
+    end
+
+    db[("SQLite + migrations")]
+
+    launch --> app
+    app -->|"app.state.octop_server"| server
+    server --> layout
+    server --> cfg
+    server --> db
+    server --> migrations
+    server --> svc
+    server --> catalogs
+    server --> ar
+    svc --> db
+    am --> svc
+    um --> svc
+    gw --> am
+    gw --> gwp
+    cronm --> gw
+    pcs --> gw
+    am --> rt
+    ha --> bws
+    bws --> disk[("~/.octop/agents/<id>/")]
+```
+
+Responsibilities:
+
+| Component | Code | Responsibility |
+|-----------|------|----------------|
+| `OctopServer` | `src/octop/infra/server.py:43` | Composition root; wires paths, config, DB, services, catalogs, runtime singletons in dependency order. |
+| `build_app` | `src/octop/api/app.py:52` | Builds FastAPI, installs JWT/setup middleware, mounts ~41 routers, serves the dashboard SPA. |
+| `AgentManager` | `src/octop/infra/agents/manager.py:94` | Process-wide registry over the harness `HarnessAgentManager`; CRUD plus `stream`/`call`/HITL resume per agent row. |
+| `Gateway` | `src/octop/infra/gateway/gateway.py:83` | Facade over channels: `ChannelManager`, `WebSocketHub`, `CliHub`, `SlashDispatcher`, `GlobalProcessor`, thread registry, media backends. |
+| `GlobalProcessor` | `src/octop/infra/gateway/process/processor.py` | Implements the harness `TeamProcessor` protocol; slash dispatch, chunk projection, agent-to-agent replies. |
+| `CronManager` | `src/octop/infra/cron/manager.py` | Process-wide APScheduler; cron rows push text or run a turn through the gateway. |
+| `UserManager` | `src/octop/infra/users/manager.py` | Auth and per-user lookups over `SharedServices`. |
+| `BackendWorkspace` | `src/octop/infra/backend` | Per-agent file I/O; filesystem by default, remote adapters behind the same root. |
+
+## 9. Request path: one dashboard chat turn
+
+The dashboard never imports Python; it speaks `/api` HTTP + WebSocket only.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Dashboard (browser)
+    participant W as chat/ws route
+    participant CM as ChannelManager
+    participant GP as GlobalProcessor
+    participant AM as AgentManager
+    participant HA as HarnessAgent
+    participant P as LLM provider
+
+    U->>W: WSS /api/agents/{id}/chat/ws (JWT + user_turn)
+    W->>W: resolve user, assert agent access
+    W->>CM: enqueue(WS_CHANNEL_ID, inbound)
+    CM->>GP: dispatch inbound on channel worker
+    GP->>AM: resolve agent, start turn
+    AM->>HA: stream(request)
+    HA->>P: model call (+ tool loop)
+    P-->>HA: tokens / tool results
+    HA-->>GP: stream chunks
+    GP->>CM: push framed chunks to WebSocketHub
+    CM-->>U: WS frames (chunks, slash output, HITL)
+```
+
+The same `GlobalProcessor` path serves IM channels and cron-triggered runs;
+only the inbound envelope and the outbound channel differ. Slash commands
+are intercepted before the model call.
+
 ## See also
 
 - [AGENTS.md](../AGENTS.md) — module boundaries, hard bans, change workflow
