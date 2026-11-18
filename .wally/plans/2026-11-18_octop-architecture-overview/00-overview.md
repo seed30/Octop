@@ -11,7 +11,7 @@
 | 流程 | 6 步 |
 | 摘要 | 在 docs/architecture.md 补充 C4-L1/L2 架构图与请求时序 |
 | 任务类型 | 其他（技术文档） |
-| 状态 | 已提交（未推送） |
+| 状态 | 已推送，PR #1 待评审 |
 | 创建日期 | 2026-11-18 |
 | 负责人 | 用户 |
 | Issue | Wally 工厂追踪 7ad4d92f-66ce-4d57-9fe8-274d8f0d07f3 |
@@ -81,4 +81,5 @@
 
 - 提交准备：完成（Message 与暂存清单见 06-review-commit.md）
 - Commit：已执行 `63d1775`（2026-11-18 21:36）
-- Push：未执行（未授权）
+- Push：已执行（origin/feature/architecture-overview）
+- PR：#1 https://github.com/seed30/Octop/pull/1
