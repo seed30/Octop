@@ -39,6 +39,9 @@
 
 ## 执行结果
 
-- Commit：未执行（等待用户明确授权）
-- Push：未执行
-- 工作区状态：`docs/architecture.md` 已修改；任务产物在 `.wally/plans/2026-11-18_octop-architecture-overview/`；分支 `feature/architecture-overview` 已创建但未推送。
+- Commit：已执行，`63d1775 docs: add architecture diagrams and initialize SOP 2.0`（2026-11-18 21:36）
+  - 实际暂存 48 个文件：`docs/architecture.md`、`AGENTS.md`（加法合并）、`CLAUDE.md`、`CODEBUDDY.md`、`.agents/`、`.wally/`（SOP 安装与本任务产物）
+  - 未暂存：`.wally-git.lock`、`AGENTS.md.bk.*`（工具锁/备份，不属于交付物）
+  - 说明：用户授权「给我提交」覆盖暂存清单疑问，`.wally/` 已按推荐纳入；提交为混合范围（SOP 初始化 + 本任务文档），因初始化产物此前未提交且被本任务记录引用
+- Push：未执行（未授权）
+- 工作区：仅剩 `.wally-git.lock` 与 `AGENTS.md.bk.*` 两个未跟踪辅助文件
