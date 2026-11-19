@@ -173,6 +173,13 @@ lint:
 	$(RUN) ruff check src tests
 	@echo "[lint] Ruff format check..."
 	$(RUN) ruff format --check src tests
+	@echo "[lint] Module size budget..."
+	$(PYTHON) scripts/check_module_size.py
+
+.PHONY: check-module-size
+check-module-size:
+	@echo "[check-module-size] Module line budget..."
+	$(PYTHON) scripts/check_module_size.py
 
 .PHONY: format
 format:

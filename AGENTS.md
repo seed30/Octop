@@ -179,6 +179,20 @@ No `octop user login` — CLI trusts local filesystem access to `~/.octop`. Pin 
 
 Frontend talks to Octop **only** via `/api` HTTP — never import or assume Python module layout.
 
+### Module size budget
+
+- A module under `src/octop/` must stay at or below **1000 lines**
+  (excluding `src/octop/dashboard/` and the bundled
+  `infra/agents/{experts,subagents}/library/` packs).
+- A new or modified file above the budget must either be split along an
+  existing seam or be recorded in [`docs/tech-debt.md`](docs/tech-debt.md)
+  in the same PR, with owner and target date.
+- Existing oversized modules are frozen at their current size: they may
+  shrink, never grow. The ceilings live in `scripts/check_module_size.py`
+  and must match `docs/tech-debt.md`.
+- `make lint` (and therefore CI) runs `make check-module-size`; a violation
+  fails the build. Do not add a file to the allowance list to bypass review.
+
 ## 6. Run commands
 
 ```bash
