@@ -23,7 +23,6 @@ Commands:
   admin      Admin commands.
   agent      Agent lifecycle commands.
   backup     Export and restore Octop backups.
-  chat       [deprecated] Alias for `octop chats`.
   chats      Chat REPL and session management.
   channel    Channel management commands.
   clean      Remove CLI state or wipe all of ~/.octop.
@@ -195,9 +194,6 @@ Commands:
   send        Send one message and stream the response.
   repl        Interactive chat REPL (embedded server + CLI gateway channel).
 ```
-
-`octop chat` is a deprecated alias that prints a stderr warning and
-forwards to `chats`.
 
 ## `octop channel`
 
