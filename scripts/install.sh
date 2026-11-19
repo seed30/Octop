@@ -14,11 +14,10 @@ OCTOP_HOME="${OCTOP_HOME:-$HOME/.octop}"
 OCTOP_VENV="$OCTOP_HOME/venv"
 OCTOP_BIN="$OCTOP_HOME/bin"
 PYTHON_VERSION="3.12"
-OCTOP_REPO="${OCTOP_REPO:-https://github.com/TencentCloud/Octop.git}"
-_OCTOP_REPO_BASE="${OCTOP_REPO%/*}"
-HARNESS_AGENT_REPO="${HARNESS_AGENT_REPO:-${_OCTOP_REPO_BASE}/harness-agent.git}"
-HARNESS_GATEWAY_REPO="${HARNESS_GATEWAY_REPO:-${_OCTOP_REPO_BASE}/harness-gateway.git}"
-HARNESS_BROWSER_REPO="${HARNESS_BROWSER_REPO:-${_OCTOP_REPO_BASE}/harness-browser.git}"
+OCTOP_REPO="${OCTOP_REPO:-https://github.com/seed30/Octop.git}"
+HARNESS_AGENT_REPO="${HARNESS_AGENT_REPO:-https://github.com/TencentCloud/harness-agent.git}"
+HARNESS_GATEWAY_REPO="${HARNESS_GATEWAY_REPO:-https://github.com/TencentCloud/harness-gateway.git}"
+HARNESS_BROWSER_REPO="${HARNESS_BROWSER_REPO:-https://github.com/TencentCloud/harness-browser.git}"
 
 if [ -n "${BASH_SOURCE[0]:-}" ]; then
     _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -92,9 +91,9 @@ Octop 安装脚本 (macOS / Linux)
   OCTOP_HOME              安装目录（默认: ~/.octop）
   OCTOP_PYPI_MIRROR       PyPI 镜像地址（与 --mirror 等效）
   OCTOP_REPO              源码克隆地址（--from-source 且无本地目录时使用）
-  HARNESS_AGENT_REPO      harness-agent 仓库（默认从 OCTOP_REPO 推导）
-  HARNESS_GATEWAY_REPO    harness-gateway 仓库（默认从 OCTOP_REPO 推导）
-  HARNESS_BROWSER_REPO    harness-browser 仓库（browser extra 源码安装时使用）
+  HARNESS_AGENT_REPO      harness-agent 仓库（默认: TencentCloud/harness-agent）
+  HARNESS_GATEWAY_REPO    harness-gateway 仓库（默认: TencentCloud/harness-gateway）
+  HARNESS_BROWSER_REPO    harness-browser 仓库（browser extra 源码安装时使用，默认: TencentCloud/harness-browser）
   PLAYWRIGHT_DOWNLOAD_HOST  Playwright 下载镜像（可选，用于加速）
 
 说明:

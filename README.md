@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white" /></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white" /></a>
   <a href="https://github.com/TencentCloud/Octop/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
   <a href="https://github.com/TencentCloud/Octop/releases"><img alt="Version" src="https://img.shields.io/badge/version-0.1.0-orange" /></a>
   <a href="https://pypi.org/project/octop/"><img src="https://img.shields.io/pypi/v/octop" alt="PyPI" /></a>
@@ -60,7 +60,7 @@ Octop is a self-hosted AI assistant platform for households and small teams. It 
 
 | Layer | Technology |
 |-------|-----------|
-| **Language** | Python 3.11+ |
+| **Language** | Python 3.12+ |
 | **Web framework** | FastAPI + uvicorn |
 | **Agent runtime** | harness-agent |
 | **Gateway** | harness-gateway |
@@ -99,7 +99,7 @@ Instead of an external queue or message broker, Octop routes every surface — W
 
 ### Surfaces
 - **Web dashboard** — chat, agents, connectors, channels, cron, settings
-- **CLI** — `octop run`, `octop chat`, `octop acp`, admin commands
+- **CLI** — `octop run`, `octop chats`, `octop acp`, admin commands
 - **HTTP/SSE API** — full programmatic access
 
 ### ACP (Agent Client Protocol)
@@ -394,7 +394,7 @@ tests/         unit/ + integration/
 
 ## 🛠️ Development
 
-**Prerequisites:** Python 3.11+, Node 18+, [uv](https://docs.astral.sh/uv/)
+**Prerequisites:** Python 3.12+, Node 18+, [uv](https://docs.astral.sh/uv/)
 
 ```bash
 # Backend

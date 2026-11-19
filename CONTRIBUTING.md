@@ -4,7 +4,7 @@ Thank you for your interest in contributing! Octop is the control-plane applicat
 
 ## Getting started
 
-**Prerequisites:** Python 3.11+, Node.js 18+, [uv](https://docs.astral.sh/uv/)
+**Prerequisites:** Python 3.12+, Node.js 18+, [uv](https://docs.astral.sh/uv/)
 
 ```bash
 git clone https://github.com/TencentCloud/Octop.git octop
@@ -55,7 +55,7 @@ Tag `v<version>` to trigger build, PyPI publish, and GitHub Release.
 
 ## 环境搭建
 
-**前置条件：** Python 3.11+、Node.js 18+、[uv](https://docs.astral.sh/uv/)
+**前置条件：** Python 3.12+、Node.js 18+、[uv](https://docs.astral.sh/uv/)
 
 ```bash
 git clone https://github.com/TencentCloud/Octop.git octop
